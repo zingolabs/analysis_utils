@@ -4,6 +4,7 @@ use plotters::{
     style::{self, Color},
 };
 use zingo_testutils::DurationAnnotation;
+#[derive(Debug)]
 struct Annotations(Vec<DurationAnnotation>);
 impl Annotations {
     fn filter_on_testname(&self, name: String) -> Annotations {
@@ -11,24 +12,21 @@ impl Annotations {
             .0
             .clone()
             .into_iter()
-            .filter(|da| da.test_name.contains(&name[..]))
+            .filter(|da| da.test_name == &name[..])
             .collect();
         Annotations(matches)
     }
+    fn get_da_roof(&self) -> u128 {
+        let durations = self
+            .0
+            .iter()
+            .map(|da| da.duration.as_millis())
+            .collect::<Vec<u128>>();
+        let duration_max = durations.iter().fold(0, |acc, d| acc.max(*d));
+        (duration_max >> 3) + duration_max
+    }
 }
 
-fn get_test_name(duration_annotations: &Vec<DurationAnnotation>) -> String {
-    let DurationAnnotation { test_name, .. } = &duration_annotations[0];
-    test_name.clone()
-}
-fn get_da_roof(duration_annotations: &Vec<DurationAnnotation>) -> u128 {
-    let durations = duration_annotations
-        .iter()
-        .map(|da| da.duration.as_millis())
-        .collect::<Vec<u128>>();
-    let duration_max = durations.iter().fold(0, |acc, d| acc.max(*d));
-    (duration_max >> 3) + duration_max
-}
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -48,9 +46,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //let image_location = std::path::PathBuf::from(image_str);
     println!("Hello, world! {}", cli.file.to_str().unwrap());
     // load annotations
-    let duration_annotations = zingo_testutils::get_duration_annotations(cli.file);
-    let duration_roof = get_da_roof(&duration_annotations);
-    let das = duration_annotations.len() as u128;
+    let duration_annotations = Annotations(zingo_testutils::get_duration_annotations(cli.file));
+    let duration_roof = duration_annotations.get_da_roof();
+    let das = duration_annotations.0.len() as u128;
     dbg!(&duration_annotations);
     // Begin plotting expressions
     use plotters::{backend, drawing};
@@ -69,7 +67,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut scatter_ctx = plotters::chart::ChartBuilder::on(&areas[1])
         .build_cartesian_2d(0u128..das + 1, 0u128..duration_roof)?;
 
-    scatter_ctx.draw_series(duration_annotations.iter().enumerate().map(
+    scatter_ctx.draw_series(duration_annotations.0.iter().enumerate().map(
         |(x, DurationAnnotation { duration, .. })| {
             plotters::prelude::Circle::new(
                 ((x as u128 + 1), duration.as_millis()),
@@ -79,7 +77,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
     ))?;
     ChartBuilder::on(&root)
-        .caption(get_test_name(&duration_annotations), ("sans-serif", 30))
+        .caption("A TEST NAME", ("sans-serif", 30))
         .x_label_area_size(40)
         .y_label_area_size(50)
         .build_cartesian_2d(0..duration_roof as u32, 0f32..1f32)?;
