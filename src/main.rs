@@ -49,10 +49,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let duration_annotations = Annotations(zingo_testutils::get_duration_annotations(cli.file));
 
     // viewonly_client_pu_false section:
-    let viewonly_client_pu_false_das = duration_annotations
-        .filter_on_testname("sync_1153_baseline_synctimes_viewonly_client_pu_false");
-    dbg!(&viewonly_client_pu_false_das);
-    let duration_roof = viewonly_client_pu_false_das.get_da_roof();
+    let keyless_client_pu_false = duration_annotations
+        .filter_on_testname("sync_1153_baseline_synctimes_keyless_client_pu_false");
+    let keyowning_client_pu_false = duration_annotations
+        .filter_on_testname("sync_1153_baseline_synctimes_keyowning_client_pu_false");
+    let fullviewonly_client_pu_false_das = duration_annotations
+        .filter_on_testname("sync_1153_baseline_synctimes_fullviewonly_client_pu_false");
+    if fullviewonly_client_pu_false_das.0.len() == 0 || keyless_client_pu_false.0.len() == 0 {
+        panic!("Empty list!")
+    }
+    dbg!(&fullviewonly_client_pu_false_das);
+    let keyless_duration_roof = keyless_client_pu_false.get_da_roof();
+    let keyowning_duration_roof = keyowning_client_pu_false.get_da_roof();
+    let full_duration_roof = fullviewonly_client_pu_false_das.get_da_roof();
+    let first_duration_roof = keyless_duration_roof.max(full_duration_roof);
+    let duration_roof = keyowning_duration_roof.max(first_duration_roof);
     //let das = viewonly_client_pu_false_das.0.len() as u128;
     // Begin plotting expressions
     use plotters::{backend, drawing};
@@ -69,9 +80,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     areas[2].fill(&style::colors::GREEN)?;
     areas[3].fill(&style::full_palette::PURPLE)?;
     let mut scatter_ctx = plotters::chart::ChartBuilder::on(&areas[1])
-        .build_cartesian_2d(0u128..3, 0u128..duration_roof)?;
+        .build_cartesian_2d(0u128..4, 0u128..duration_roof)?;
 
-    scatter_ctx.draw_series(viewonly_client_pu_false_das.0.iter().enumerate().map(
+    scatter_ctx.draw_series(keyless_client_pu_false.0.iter().enumerate().map(
         |(_, DurationAnnotation { duration, .. })| {
             plotters::prelude::Circle::new(
                 (1, duration.as_millis()),
@@ -80,8 +91,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             )
         },
     ))?;
+    scatter_ctx.draw_series(fullviewonly_client_pu_false_das.0.iter().enumerate().map(
+        |(_, DurationAnnotation { duration, .. })| {
+            plotters::prelude::Circle::new(
+                (2, duration.as_millis()),
+                2,
+                plotters::style::RED.filled(),
+            )
+        },
+    ))?;
+    scatter_ctx.draw_series(keyowning_client_pu_false.0.iter().enumerate().map(
+        |(_, DurationAnnotation { duration, .. })| {
+            plotters::prelude::Circle::new(
+                (3, duration.as_millis()),
+                2,
+                plotters::style::GREEN.filled(),
+            )
+        },
+    ))?;
     ChartBuilder::on(&root)
-        .caption("viewonly_client_pu_false", ("sans-serif", 30))
+        .caption(
+            "keyless_client, fvk_only_client, keyowning_client",
+            ("sans-serif", 30),
+        )
         .x_label_area_size(40)
         .y_label_area_size(50)
         .build_cartesian_2d(0..duration_roof as u32, 0f32..1f32)?;
