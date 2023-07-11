@@ -7,12 +7,12 @@ use zingo_testutils::DurationAnnotation;
 #[derive(Debug)]
 struct Annotations(Vec<DurationAnnotation>);
 impl Annotations {
-    fn filter_on_testname(&self, name: String) -> Annotations {
+    fn filter_on_testname(&self, name: &str) -> Annotations {
         let matches = self
             .0
             .clone()
             .into_iter()
-            .filter(|da| da.test_name == &name[..])
+            .filter(|da| da.test_name == name)
             .collect();
         Annotations(matches)
     }
@@ -47,9 +47,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Hello, world! {}", cli.file.to_str().unwrap());
     // load annotations
     let duration_annotations = Annotations(zingo_testutils::get_duration_annotations(cli.file));
-    let duration_roof = duration_annotations.get_da_roof();
-    let das = duration_annotations.0.len() as u128;
-    dbg!(&duration_annotations);
+
+    // viewonly_client_pu_false section:
+    let viewonly_client_pu_false_das =
+        duration_annotations.filter_on_testname("viewonly_client_pu_false");
+    let duration_roof = viewonly_client_pu_false_das.get_da_roof();
+    let das = viewonly_client_pu_false_das.0.len() as u128;
+    dbg!(&viewonly_client_pu_false_das);
     // Begin plotting expressions
     use plotters::{backend, drawing};
     let root = drawing::IntoDrawingArea::into_drawing_area(backend::BitMapBackend::new(
@@ -67,7 +71,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut scatter_ctx = plotters::chart::ChartBuilder::on(&areas[1])
         .build_cartesian_2d(0u128..das + 1, 0u128..duration_roof)?;
 
-    scatter_ctx.draw_series(duration_annotations.0.iter().enumerate().map(
+    scatter_ctx.draw_series(viewonly_client_pu_false_das.0.iter().enumerate().map(
         |(x, DurationAnnotation { duration, .. })| {
             plotters::prelude::Circle::new(
                 ((x as u128 + 1), duration.as_millis()),
@@ -77,7 +81,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
     ))?;
     ChartBuilder::on(&root)
-        .caption("A TEST NAME", ("sans-serif", 30))
+        .caption("viewonly_client_pu_false", ("sans-serif", 30))
         .x_label_area_size(40)
         .y_label_area_size(50)
         .build_cartesian_2d(0..duration_roof as u32, 0f32..1f32)?;
