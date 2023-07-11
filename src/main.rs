@@ -44,16 +44,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         + ".png";
     dbg!(&image_str);
     //let image_location = std::path::PathBuf::from(image_str);
-    println!("Hello, world! {}", cli.file.to_str().unwrap());
+    println!("Annotation Source File: {}", cli.file.to_str().unwrap());
     // load annotations
     let duration_annotations = Annotations(zingo_testutils::get_duration_annotations(cli.file));
 
     // viewonly_client_pu_false section:
-    let viewonly_client_pu_false_das =
-        duration_annotations.filter_on_testname("viewonly_client_pu_false");
-    let duration_roof = viewonly_client_pu_false_das.get_da_roof();
-    let das = viewonly_client_pu_false_das.0.len() as u128;
+    let viewonly_client_pu_false_das = duration_annotations
+        .filter_on_testname("sync_1153_baseline_synctimes_viewonly_client_pu_false");
     dbg!(&viewonly_client_pu_false_das);
+    let duration_roof = viewonly_client_pu_false_das.get_da_roof();
+    //let das = viewonly_client_pu_false_das.0.len() as u128;
     // Begin plotting expressions
     use plotters::{backend, drawing};
     let root = drawing::IntoDrawingArea::into_drawing_area(backend::BitMapBackend::new(
@@ -69,12 +69,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     areas[2].fill(&style::colors::GREEN)?;
     areas[3].fill(&style::full_palette::PURPLE)?;
     let mut scatter_ctx = plotters::chart::ChartBuilder::on(&areas[1])
-        .build_cartesian_2d(0u128..das + 1, 0u128..duration_roof)?;
+        .build_cartesian_2d(0u128..3, 0u128..duration_roof)?;
 
     scatter_ctx.draw_series(viewonly_client_pu_false_das.0.iter().enumerate().map(
-        |(x, DurationAnnotation { duration, .. })| {
+        |(_, DurationAnnotation { duration, .. })| {
             plotters::prelude::Circle::new(
-                ((x as u128 + 1), duration.as_millis()),
+                (1, duration.as_millis()),
                 2,
                 plotters::style::BLUE.filled(),
             )
