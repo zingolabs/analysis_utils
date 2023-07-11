@@ -4,6 +4,18 @@ use plotters::{
     style::{self, Color},
 };
 use zingo_testutils::DurationAnnotation;
+struct Annotations(Vec<DurationAnnotation>);
+impl Annotations {
+    fn filter_on_testname(&self, name: String) -> Annotations {
+        let matches = self
+            .0
+            .clone()
+            .into_iter()
+            .filter(|da| da.test_name.contains(&name[..]))
+            .collect();
+        Annotations(matches)
+    }
+}
 
 fn get_test_name(duration_annotations: &Vec<DurationAnnotation>) -> String {
     let DurationAnnotation { test_name, .. } = &duration_annotations[0];
