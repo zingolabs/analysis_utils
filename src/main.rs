@@ -42,7 +42,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .trim_end_matches(".json")
         .to_owned()
         + ".png";
-    dbg!(&image_str);
     //let image_location = std::path::PathBuf::from(image_str);
     println!("Annotation Source File: {}", cli.file.to_str().unwrap());
     // load annotations
@@ -55,7 +54,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .filter_on_testname("sync_1153_baseline_synctimes_keyowning_client_pu_false");
     let fullviewonly_client_pu_false_das = duration_annotations
         .filter_on_testname("sync_1153_baseline_synctimes_fullviewonly_client_pu_false");
-    if fullviewonly_client_pu_false_das.0.len() == 0 || keyless_client_pu_false.0.len() == 0 {
+    if dbg!(fullviewonly_client_pu_false_das.0.len()) == 0
+        || dbg!(keyless_client_pu_false.0.len()) == 0
+        || dbg!(keyowning_client_pu_false.0.len()) == 0
+    {
         panic!("Empty list!")
     }
     dbg!(&fullviewonly_client_pu_false_das);
