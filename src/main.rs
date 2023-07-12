@@ -30,7 +30,12 @@ impl Annotations {
         (duration_max >> 3) + duration_max
     }
     fn get_testname(&self) -> String {
-        self.0[0].test_name.clone()
+        self.0[0]
+            .test_name
+            .clone()
+            .trim_start_matches("sync_1153_baseline_synctimes_")
+            .trim_end_matches("_client_pu_false")
+            .to_string()
     }
 }
 
@@ -40,12 +45,13 @@ struct Args {
     file: std::path::PathBuf,
 }
 macro_rules! graph_durations {
-    ($chart:tt, $annotations:tt, $color:tt) => {
+    ($chart:tt, $annotations:tt, $color:tt, $position:ident) => {
+        $position += 1;
         $chart
             .draw_series($annotations.0.iter().enumerate().map(
                 |(_, DurationAnnotation { duration, .. })| {
                     plotters::prelude::Circle::new(
-                        (1, duration.as_millis()),
+                        ($position, duration.as_millis()),
                         2,
                         plotters::style::$color.filled(),
                     )
@@ -113,31 +119,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_desc("Benchmark Scenarios")
         .draw()?;
     */
-    graph_durations!(chart, keyless_client_pu_false, BLUE);
-    chart
-        .draw_series(fullviewonly_client_pu_false_das.0.iter().enumerate().map(
-            |(_, DurationAnnotation { duration, .. })| {
-                plotters::prelude::Circle::new(
-                    (2, duration.as_millis()),
-                    2,
-                    plotters::style::RED.filled(),
-                )
-            },
-        ))?
-        .label("fullviewonly")
-        .legend(|(x, y)| Circle::new((x + 15, y), 2, RED.filled()));
-    chart
-        .draw_series(keyowning_client_pu_false.0.iter().enumerate().map(
-            |(_, DurationAnnotation { duration, .. })| {
-                plotters::prelude::Circle::new(
-                    (3, duration.as_millis()),
-                    2,
-                    plotters::style::GREEN.filled(),
-                )
-            },
-        ))?
-        .label("keyowning")
-        .legend(|(x, y)| Circle::new((x + 15, y), 2, GREEN.filled()));
+    let mut position = 0;
+    graph_durations!(chart, keyless_client_pu_false, BLUE, position);
+    graph_durations!(chart, fullviewonly_client_pu_false_das, RED, position);
+    graph_durations!(chart, keyowning_client_pu_false, GREEN, position);
     chart
         .configure_series_labels()
         .label_font(("Calibri", 20))
