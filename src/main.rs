@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use clap::Parser;
 use plotters::{
     prelude::Circle,
@@ -24,6 +26,10 @@ impl Annotations {
             .collect::<Vec<u128>>();
         let duration_max = durations.iter().fold(0, |acc, d| acc.max(*d));
         (duration_max >> 3) + duration_max
+    }
+    fn get_da_mean(&self) -> u128 {
+        let total: Duration = self.0.iter().map(|x| x.duration).sum();
+        total.as_millis() / self.0.len() as u128
     }
     fn get_testname(&self) -> String {
         self.0[0]
@@ -55,6 +61,7 @@ macro_rules! graph_durations {
             ))?
             .label($annotations.get_testname())
             .legend(|(x, y)| Circle::new((x + 15, y), 2, plotters::style::$color.filled()));
+        let mean = $annotations.get_da_mean();
     };
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -102,8 +109,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     root.fill(&style::colors::WHITE)?;
 
     let mut chart = plotters::chart::ChartBuilder::on(&root)
-        .x_label_area_size(50)
-        .y_label_area_size(50)
+        .x_label_area_size(30)
+        .y_label_area_size(60)
         .caption("1153 Block Chain, Sync Times", ("Calibri", 30.0))
         .build_cartesian_2d(0u128..4, 0u128..duration_roof)?;
 
