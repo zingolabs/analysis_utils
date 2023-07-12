@@ -29,12 +29,32 @@ impl Annotations {
         let duration_max = durations.iter().fold(0, |acc, d| acc.max(*d));
         (duration_max >> 3) + duration_max
     }
+    fn get_testnames(&self) -> Vec<String> {
+        let mut names: Vec<String> = vec![];
+        todo!()
+    }
 }
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
     file: std::path::PathBuf,
+}
+macro_rules! graph_durations {
+    ($color:ident) => {
+        chart
+            .draw_series(keyless_client_pu_false.0.iter().enumerate().map(
+                |(_, DurationAnnotation { duration, .. })| {
+                    plotters::prelude::Circle::new(
+                        (1, duration.as_millis()),
+                        2,
+                        plotters::style::BLUE.filled(),
+                    )
+                },
+            ))?
+            .label("keyless")
+            .legend(|(x, y)| Circle::new((x + 15, y), 2, plotters::style::BLUE.filled()));
+    };
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // get input
