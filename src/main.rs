@@ -29,9 +29,8 @@ impl Annotations {
         let duration_max = durations.iter().fold(0, |acc, d| acc.max(*d));
         (duration_max >> 3) + duration_max
     }
-    fn get_testnames(&self) -> Vec<String> {
-        let mut names: Vec<String> = vec![];
-        todo!()
+    fn get_testname(&self) -> String {
+        self.0[0].test_name.clone()
     }
 }
 
@@ -52,7 +51,7 @@ macro_rules! graph_durations {
                     )
                 },
             ))?
-            .label("keyless")
+            .label($annotations.get_testname())
             .legend(|(x, y)| Circle::new((x + 15, y), 2, plotters::style::$color.filled()));
     };
 }
