@@ -1,7 +1,11 @@
 use clap::Parser;
 use plotters::{
-    prelude::ChartBuilder,
-    style::{self, Color},
+    prelude::Circle,
+    style::{
+        self,
+        full_palette::{BLUE, GREEN, RED},
+        Color,
+    },
 };
 use zingo_testutils::DurationAnnotation;
 #[derive(Debug)]
@@ -81,45 +85,67 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     areas[1].fill(&style::colors::YELLOW)?;
     areas[2].fill(&style::colors::GREEN)?;
     areas[3].fill(&style::full_palette::PURPLE)?;
-    let mut scatter_ctx = plotters::chart::ChartBuilder::on(&areas[1])
+    let mut chart = plotters::chart::ChartBuilder::on(&areas[1])
         .build_cartesian_2d(0u128..4, 0u128..duration_roof)?;
 
-    scatter_ctx.draw_series(keyless_client_pu_false.0.iter().enumerate().map(
-        |(_, DurationAnnotation { duration, .. })| {
-            plotters::prelude::Circle::new(
-                (1, duration.as_millis()),
-                2,
-                plotters::style::BLUE.filled(),
+    /*
+    chart
+        .configure_mesh()
+        .x_desc("Benchmark Scenarios")
+        .draw()?;
+    */
+    chart
+        .draw_series(keyless_client_pu_false.0.iter().enumerate().map(
+            |(_, DurationAnnotation { duration, .. })| {
+                plotters::prelude::Circle::new(
+                    (1, duration.as_millis()),
+                    2,
+                    plotters::style::BLUE.filled(),
+                )
+            },
+        ))?
+        .label("keyless")
+        .legend(|(x, y)| Circle::new((x + 15, y), 2, plotters::style::BLUE.filled()));
+    chart
+        .draw_series(fullviewonly_client_pu_false_das.0.iter().enumerate().map(
+            |(_, DurationAnnotation { duration, .. })| {
+                plotters::prelude::Circle::new(
+                    (2, duration.as_millis()),
+                    2,
+                    plotters::style::RED.filled(),
+                )
+            },
+        ))?
+        .label("fullviewonly")
+        .legend(|(x, y)| Circle::new((x + 15, y), 2, RED.filled()));
+    chart
+        .draw_series(keyowning_client_pu_false.0.iter().enumerate().map(
+            |(_, DurationAnnotation { duration, .. })| {
+                plotters::prelude::Circle::new(
+                    (3, duration.as_millis()),
+                    2,
+                    plotters::style::GREEN.filled(),
+                )
+            },
+        ))?
+        .label("keyowning")
+        .legend(|(x, y)| Circle::new((x + 15, y), 2, GREEN.filled()));
+    chart
+        .configure_series_labels()
+        .label_font(("Calibri", 20))
+        .background_style(&plotters::style::WHITE.mix(0.8))
+        .border_style(&plotters::style::BLACK)
+        .draw()?;
+    /*
+        ChartBuilder::on(&root)
+            .caption(
+                "keyless_client, fvk_only_client, keyowning_client",
+                ("sans-serif", 30),
             )
-        },
-    ))?;
-    scatter_ctx.draw_series(fullviewonly_client_pu_false_das.0.iter().enumerate().map(
-        |(_, DurationAnnotation { duration, .. })| {
-            plotters::prelude::Circle::new(
-                (2, duration.as_millis()),
-                2,
-                plotters::style::RED.filled(),
-            )
-        },
-    ))?;
-    scatter_ctx.draw_series(keyowning_client_pu_false.0.iter().enumerate().map(
-        |(_, DurationAnnotation { duration, .. })| {
-            plotters::prelude::Circle::new(
-                (3, duration.as_millis()),
-                2,
-                plotters::style::GREEN.filled(),
-            )
-        },
-    ))?;
-    ChartBuilder::on(&root)
-        .caption(
-            "keyless_client, fvk_only_client, keyowning_client",
-            ("sans-serif", 30),
-        )
-        .x_label_area_size(40)
-        .y_label_area_size(50)
-        .build_cartesian_2d(0..duration_roof as u32, 0f32..1f32)?;
-
+            .x_label_area_size(40)
+            .y_label_area_size(50)
+            .build_cartesian_2d(0..duration_roof as u32, 0f32..1f32)?;
+    */
     //let run_by_duration: Vec<usize, Duration> = duration_annotations.iter().menumerate().collect();
     //let areas = root.split_by_breakpoints([944], [80]);
 
