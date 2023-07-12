@@ -41,19 +41,19 @@ struct Args {
     file: std::path::PathBuf,
 }
 macro_rules! graph_durations {
-    ($color:ident) => {
-        chart
-            .draw_series(keyless_client_pu_false.0.iter().enumerate().map(
+    ($chart:tt, $annotations:tt, $color:tt) => {
+        $chart
+            .draw_series($annotations.0.iter().enumerate().map(
                 |(_, DurationAnnotation { duration, .. })| {
                     plotters::prelude::Circle::new(
                         (1, duration.as_millis()),
                         2,
-                        plotters::style::BLUE.filled(),
+                        plotters::style::$color.filled(),
                     )
                 },
             ))?
             .label("keyless")
-            .legend(|(x, y)| Circle::new((x + 15, y), 2, plotters::style::BLUE.filled()));
+            .legend(|(x, y)| Circle::new((x + 15, y), 2, plotters::style::$color.filled()));
     };
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -114,18 +114,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_desc("Benchmark Scenarios")
         .draw()?;
     */
-    chart
-        .draw_series(keyless_client_pu_false.0.iter().enumerate().map(
-            |(_, DurationAnnotation { duration, .. })| {
-                plotters::prelude::Circle::new(
-                    (1, duration.as_millis()),
-                    2,
-                    plotters::style::BLUE.filled(),
-                )
-            },
-        ))?
-        .label("keyless")
-        .legend(|(x, y)| Circle::new((x + 15, y), 2, plotters::style::BLUE.filled()));
+    graph_durations!(chart, keyless_client_pu_false, BLUE);
     chart
         .draw_series(fullviewonly_client_pu_false_das.0.iter().enumerate().map(
             |(_, DurationAnnotation { duration, .. })| {
