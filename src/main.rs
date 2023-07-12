@@ -1,11 +1,7 @@
 use clap::Parser;
 use plotters::{
     prelude::Circle,
-    style::{
-        self,
-        full_palette::{BLUE, GREEN, RED},
-        Color,
-    },
+    style::{self, full_palette::WHITE, Color},
 };
 use zingo_testutils::DurationAnnotation;
 #[derive(Debug)]
@@ -104,21 +100,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ));
 
     root.fill(&style::colors::WHITE)?;
-    let areas = root.split_by_breakpoints([80], [688]);
 
-    areas[0].fill(&style::colors::RED)?;
-    areas[1].fill(&style::colors::YELLOW)?;
-    areas[2].fill(&style::colors::GREEN)?;
-    areas[3].fill(&style::full_palette::PURPLE)?;
-    let mut chart = plotters::chart::ChartBuilder::on(&areas[1])
+    let mut chart = plotters::chart::ChartBuilder::on(&root)
+        .x_label_area_size(50)
+        .y_label_area_size(50)
+        .caption("1153 Block Chain, Sync Times", ("Calibri", 30.0))
         .build_cartesian_2d(0u128..4, 0u128..duration_roof)?;
 
-    /*
     chart
         .configure_mesh()
+        .bold_line_style(&WHITE.mix(0.3))
+        .y_desc("MilliSeconds To Sync")
         .x_desc("Benchmark Scenarios")
+        .axis_desc_style(("sans-serif", 15))
         .draw()?;
-    */
     let mut position = 0;
     graph_durations!(chart, keyless_client_pu_false, BLUE, position);
     graph_durations!(chart, fullviewonly_client_pu_false_das, RED, position);
