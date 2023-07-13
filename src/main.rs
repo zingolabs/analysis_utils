@@ -9,12 +9,28 @@ use zingo_testutils::DurationAnnotation;
 #[derive(Debug)]
 struct Annotations(Vec<DurationAnnotation>);
 impl Annotations {
+    fn truncate(&self) -> Annotations {
+        let trunced = self.0[..self.0.len() - 1]
+            .into_iter()
+            .cloned()
+            .collect::<Vec<DurationAnnotation>>();
+        Annotations(trunced)
+    }
     fn filter_on_testname(&self, name: &str) -> Annotations {
         let matches = self
             .0
             .clone()
             .into_iter()
             .filter(|da| da.test_name == name)
+            .collect();
+        Annotations(matches)
+    }
+    fn filter_on_git_description(&self, git_description: &str) -> Annotations {
+        let matches = self
+            .0
+            .clone()
+            .into_iter()
+            .filter(|da| da.git_description == git_description)
             .collect();
         Annotations(matches)
     }
@@ -61,7 +77,7 @@ macro_rules! graph_durations {
             ))?
             .label($annotations.get_testname())
             .legend(|(x, y)| Circle::new((x + 15, y), 2, plotters::style::$color.filled()));
-        let mean = $annotations.get_da_mean();
+        //let mean = $annotations.get_da_mean();
     };
 }
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -82,22 +98,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // viewonly_client_pu_false section:
     let keyless_client_pu_false = duration_annotations
         .filter_on_testname("sync_1153_baseline_synctimes_keyless_client_pu_false");
+    let keyless_client_pu_false =
+        keyless_client_pu_false.filter_on_git_description("vzing-0.3.0-353-g3df3888d");
     let keyowning_client_pu_false = duration_annotations
         .filter_on_testname("sync_1153_baseline_synctimes_keyowning_client_pu_false");
-    let fullviewonly_client_pu_false_das = duration_annotations
+    let fullviewonly_client_pu_false = duration_annotations
         .filter_on_testname("sync_1153_baseline_synctimes_fullviewonly_client_pu_false");
-    if dbg!(fullviewonly_client_pu_false_das.0.len()) == 0
+    let fullviewonly_client_pu_false =
+        fullviewonly_client_pu_false.filter_on_git_description("vzing-0.3.0-353-g3df3888d");
+    let keyless_client_pu_false = keyless_client_pu_false.truncate();
+    let fullviewonly_client_pu_false = fullviewonly_client_pu_false.truncate();
+    if dbg!(fullviewonly_client_pu_false.0.len()) == 0
         || dbg!(keyless_client_pu_false.0.len()) == 0
         || dbg!(keyowning_client_pu_false.0.len()) == 0
     {
         panic!("Empty list!")
     }
-    dbg!(&fullviewonly_client_pu_false_das);
+    dbg!(&fullviewonly_client_pu_false);
     let keyless_duration_roof = keyless_client_pu_false.get_da_roof();
-    let keyowning_duration_roof = keyowning_client_pu_false.get_da_roof();
-    let full_duration_roof = fullviewonly_client_pu_false_das.get_da_roof();
-    let first_duration_roof = keyless_duration_roof.max(full_duration_roof);
-    let duration_roof = keyowning_duration_roof.max(first_duration_roof);
+    //let keyowning_duration_roof = keyowning_client_pu_false.get_da_roof();
+    let full_duration_roof = fullviewonly_client_pu_false.get_da_roof();
+    //let first_duration_roof = keyless_duration_roof.max(full_duration_roof);
+    let duration_roof = keyless_duration_roof.max(full_duration_roof);
     //let das = viewonly_client_pu_false_das.0.len() as u128;
     // Begin plotting expressions
     use plotters::{backend, drawing};
@@ -112,7 +134,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .x_label_area_size(30)
         .y_label_area_size(60)
         .caption("1153 Block Chain, Sync Times", ("Calibri", 30.0))
-        .build_cartesian_2d(0u128..4, 0u128..duration_roof)?;
+        .build_cartesian_2d(0u128..3, 0u128..duration_roof)?;
 
     chart
         .configure_mesh()
@@ -123,8 +145,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .draw()?;
     let mut position = 0;
     graph_durations!(chart, keyless_client_pu_false, BLUE, position);
-    graph_durations!(chart, fullviewonly_client_pu_false_das, RED, position);
-    graph_durations!(chart, keyowning_client_pu_false, GREEN, position);
+    graph_durations!(chart, fullviewonly_client_pu_false, RED, position);
+    //graph_durations!(chart, keyowning_client_pu_false, GREEN, position);
     chart
         .configure_series_labels()
         .label_font(("Calibri", 20))
