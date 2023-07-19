@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use clap::Parser;
 use plotters::{
     prelude::Circle,
@@ -42,10 +40,6 @@ impl Annotations {
             .collect::<Vec<u128>>();
         let duration_max = durations.iter().fold(0, |acc, d| acc.max(*d));
         (duration_max >> 3) + duration_max
-    }
-    fn get_da_mean(&self) -> u128 {
-        let total: Duration = self.0.iter().map(|x| x.duration).sum();
-        total.as_millis() / self.0.len() as u128
     }
     fn get_testname(&self) -> String {
         self.0[0]
@@ -96,18 +90,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let duration_annotations = Annotations(zingo_testutils::get_duration_annotations(cli.file));
 
     // viewonly_client_pu_false section:
-    let keyless_client_pu_false = duration_annotations
-        .filter_on_testname("sync_1153_baseline_synctimes_keyless_client_pu_false");
     let keyless_client_pu_false =
-        keyless_client_pu_false.filter_on_git_description("vzing-0.3.0-353-g3df3888d");
-    let keyowning_client_pu_false = duration_annotations
-        .filter_on_testname("sync_1153_baseline_synctimes_keyowning_client_pu_false");
-    let fullviewonly_client_pu_false = duration_annotations
-        .filter_on_testname("sync_1153_baseline_synctimes_fullviewonly_client_pu_false");
+        duration_annotations.filter_on_testname("keyless_client_pu_false");
+    let keyowning_client_pu_false =
+        duration_annotations.filter_on_testname("keyowning_client_pu_false");
     let fullviewonly_client_pu_false =
-        fullviewonly_client_pu_false.filter_on_git_description("vzing-0.3.0-353-g3df3888d");
-    let keyless_client_pu_false = keyless_client_pu_false.truncate();
-    let fullviewonly_client_pu_false = fullviewonly_client_pu_false.truncate();
+        duration_annotations.filter_on_testname("fullviewonly_client_pu_false");
     if dbg!(fullviewonly_client_pu_false.0.len()) == 0
         || dbg!(keyless_client_pu_false.0.len()) == 0
         || dbg!(keyowning_client_pu_false.0.len()) == 0
