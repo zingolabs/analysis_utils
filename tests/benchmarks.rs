@@ -47,8 +47,6 @@ mod benchmarks {
     }
     mod sync_1153_baseline_synctimes {
 
-        use zingo_testutils::DurationAnnotation;
-
         use super::*;
         #[tokio::test]
         async fn keyless_client_pu_true() {

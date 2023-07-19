@@ -7,11 +7,9 @@ use zingo_testutils::DurationAnnotation;
 #[derive(Debug)]
 struct Annotations(Vec<DurationAnnotation>);
 impl Annotations {
+    #[allow(unused)]
     fn truncate(&self) -> Annotations {
-        let trunced = self.0[..self.0.len() - 1]
-            .into_iter()
-            .cloned()
-            .collect::<Vec<DurationAnnotation>>();
+        let trunced = self.0[..self.0.len() - 1].to_vec();
         Annotations(trunced)
     }
     fn filter_on_testname(&self, name: &str) -> Annotations {
@@ -23,6 +21,7 @@ impl Annotations {
             .collect();
         Annotations(matches)
     }
+    #[allow(unused)]
     fn filter_on_git_description(&self, git_description: &str) -> Annotations {
         let matches = self
             .0
@@ -126,7 +125,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     chart
         .configure_mesh()
-        .bold_line_style(&WHITE.mix(0.3))
+        .bold_line_style(WHITE.mix(0.3))
         .y_desc("MilliSeconds To Sync")
         .x_desc("Benchmark Scenarios")
         .axis_desc_style(("sans-serif", 15))
@@ -138,8 +137,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .configure_series_labels()
         .label_font(("Calibri", 20))
-        .background_style(&plotters::style::WHITE.mix(0.8))
-        .border_style(&plotters::style::BLACK)
+        .background_style(plotters::style::WHITE.mix(0.8))
+        .border_style(plotters::style::BLACK)
         .draw()?;
     /*
         ChartBuilder::on(&root)
