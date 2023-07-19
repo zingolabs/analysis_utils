@@ -1,36 +1,7 @@
 #![forbid(unsafe_code)]
-#![cfg(feature = "local_env")]
-pub mod darkside;
-use std::{fs::File, path::Path};
-use zingo_testutils::{self, build_fvk_client_and_capability, data};
 
-use bip0039::Mnemonic;
-use data::seeds::HOSPITAL_MUSEUM_SEED;
-use json::JsonValue::{self, Null};
 use tokio::time::Instant;
 use zingo_testutils::scenarios;
-
-use tracing_test::traced_test;
-use zcash_client_backend::encoding::encode_payment_address;
-use zcash_primitives::{
-    consensus::Parameters,
-    merkle_tree::write_incremental_witness,
-    transaction::{fees::zip317::MINIMUM_FEE, TxId},
-};
-use zingo_testutils::regtest::get_cargo_manifest_dir_parent;
-use zingoconfig::{ChainType, ZingoConfig};
-use zingolib::{
-    check_client_balances, get_base_address,
-    lightclient::LightClient,
-    wallet::{
-        data::TransactionMetadata,
-        keys::{
-            extended_transparent::ExtendedPrivKey,
-            unified::{Capability, WalletCapability},
-        },
-        LightWallet, Pool,
-    },
-};
 
 #[test]
 fn inside_benchmarks() {}
@@ -77,6 +48,14 @@ mod benchmarks {
                     sync_duration = timer_stop.duration_since(timer_start);
                     drop(child_process_handler);
                 }
+                "debug" => {
+                    let (_, child_process_handler, _view_only_client) =
+                        scenarios::chainload::unsynced_viewonlyclient_1153().await;
+                    let timer_start = Instant::now();
+                    let timer_stop = Instant::now();
+                    sync_duration = timer_stop.duration_since(timer_start);
+                    drop(child_process_handler);
+                }
                 _ => panic!(),
             }
             let annotation = DurationAnnotation::new(
@@ -110,6 +89,10 @@ mod benchmarks {
         #[tokio::test]
         async fn fullviewonly_client_pu_false() {
             timing_run("fullviewonly", false).await;
+        }
+        #[tokio::test]
+        async fn poc() {
+            timing_run("debug", false).await;
         }
     }
 }
