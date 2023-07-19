@@ -4,3 +4,4 @@ regtest/bin/lightwalletd
 regtest/bin/zcashd
 regtest/bin/zcash-cli
 tests/times/sync_duration_annotation.json
+tests/times/sync_duration_annotation.png
