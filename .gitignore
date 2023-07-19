@@ -1,2 +1,5 @@
 /target
 Cargo.lock
+regtest/bin/lightwalletd
+regtest/bin/zcashd
+regtest/bin/zcash-cli
