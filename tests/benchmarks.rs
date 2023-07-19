@@ -48,14 +48,6 @@ mod benchmarks {
                     sync_duration = timer_stop.duration_since(timer_start);
                     drop(child_process_handler);
                 }
-                "debug" => {
-                    let (_, child_process_handler, _view_only_client) =
-                        scenarios::chainload::unsynced_viewonlyclient_1153().await;
-                    let timer_start = Instant::now();
-                    let timer_stop = Instant::now();
-                    sync_duration = timer_stop.duration_since(timer_start);
-                    drop(child_process_handler);
-                }
                 _ => panic!(),
             }
             let annotation = DurationAnnotation::new(
@@ -92,7 +84,8 @@ mod benchmarks {
         }
         #[tokio::test]
         async fn poc() {
-            timing_run("debug", false).await;
+            let (_, _child_process_handler, _view_only_client) =
+                scenarios::chainload::unsynced_viewonlyclient_1153().await;
         }
     }
 }

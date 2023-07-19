@@ -8,9 +8,9 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.3.11", features = ["derive"] }
 plotters = "0.3.5"
-zingo-testutils = { git = "https://github.com/zancas/zingolib.git", branch = "allow_analysis" }
-zingolib = { git = "https://github.com/zancas/zingolib.git", branch = "allow_analysis" }
-zingoconfig = { git = "https://github.com/zancas/zingolib.git", branch = "allow_analysis" }
+zingo-testutils = { path = "../zingolibs/default/zingo-testutils" }
+zingolib = { path = "../zingolibs/default/zingolib" }
+zingoconfig = { path = "../zingolibs/default/zingoconfig" }
 tokio =  { version = "1.24.2", features = ["full"] }
 json = "0.12.4"
 
