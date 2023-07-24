@@ -5,7 +5,10 @@ use tokio::time::Instant;
 use zingo_testutils::scenarios;
 
 #[duration_annotation_test]
-async fn first_annotated_test() {}
+#[tokio::test]
+async fn first_annotated_test() {
+    panic!();
+}
 async fn timing_run(keyownership: &str, print_updates: bool) {
     let sync_duration;
     match keyownership {

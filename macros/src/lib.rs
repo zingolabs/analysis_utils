@@ -11,5 +11,7 @@ pub fn duration_annotation_test(_args: TokenStream, input: TokenStream) -> Token
     } else {
         panic!("Arrgggh!")
     };
-    TokenStream::from(quote! {#function})
+    dbg!("function blorg");
+    dbg!(_args.to_string());
+    TokenStream::from(quote! {})
 }

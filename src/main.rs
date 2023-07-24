@@ -6,6 +6,12 @@ use plotters::{
 use zingo_testutils::DurationAnnotation;
 #[derive(Debug)]
 struct Annotations(Vec<DurationAnnotation>);
+struct ToDisplay(String);
+impl std::fmt::Display for ToDisplay {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{}", self.0)
+    }
+}
 impl Annotations {
     #[allow(unused)]
     fn truncate(&self) -> Annotations {
