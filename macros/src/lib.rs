@@ -5,13 +5,19 @@ use quote::quote;
 use syn::{parse_macro_input, Item};
 
 #[proc_macro_attribute]
-pub fn duration_annotation_test(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let function = if let Item::Fn(funct) = parse_macro_input!(input as Item) {
+pub fn annotated_benchmark(
+    attrib_args: TokenStream,
+    bench_template_args: TokenStream,
+) -> TokenStream {
+    let function = if let Item::Fn(funct) = parse_macro_input!(bench_template_args as Item) {
         funct
     } else {
-        panic!("Arrgggh!")
+        panic!("Expected to be applied to a function!")
     };
-    dbg!("function blorg");
-    dbg!(_args.to_string());
     TokenStream::from(quote! {#function})
+}
+
+fn annotate_function(fn_tokens: syn::ItemFn) -> syn::ItemFn {
+    todo!()
+    //let x = fn_tokens.clone_into();
 }

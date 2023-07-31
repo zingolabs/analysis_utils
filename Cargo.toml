@@ -13,3 +13,5 @@ zingolib = { path = "../zingolibs/default/zingolib" }
 zingoconfig = { path = "../zingolibs/default/zingoconfig" }
 tokio =  { version = "1.24.2", features = ["full"] }
 json = "0.12.4"
+proc-macro2 = "1.0.66"
+syn = "2.0.28"

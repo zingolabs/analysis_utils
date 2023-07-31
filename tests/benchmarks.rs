@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use macros::duration_annotation_test;
+use macros::annotated_benchmark;
 use tokio::time::Instant;
 use zingo_testutils::scenarios;
 
