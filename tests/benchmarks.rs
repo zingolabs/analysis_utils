@@ -4,11 +4,6 @@ use macros::duration_annotation_test;
 use tokio::time::Instant;
 use zingo_testutils::scenarios;
 
-#[duration_annotation_test]
-#[tokio::test]
-async fn first_annotated_test() {
-    panic!();
-}
 async fn timing_run(keyownership: &str, print_updates: bool) {
     let sync_duration;
     match keyownership {
@@ -56,6 +51,7 @@ mod sync_1153_baseline_synctimes {
     async fn keyless_client_pu_true() {
         timing_run("keyless", true).await;
     }
+    #[duration_annotation_test("fun", "ham", 1)]
     #[tokio::test]
     async fn keyless_client_pu_false() {
         timing_run("keyless", false).await;
