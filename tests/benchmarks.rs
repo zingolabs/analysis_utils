@@ -51,7 +51,7 @@ mod sync_1153_baseline_synctimes {
     async fn keyless_client_pu_true() {
         timing_run("keyless", true).await;
     }
-    #[duration_annotation_test("fun", "ham", 1)]
+    #[annotated_benchmark("fun", "ham", 1)]
     #[tokio::test]
     async fn keyless_client_pu_false() {
         timing_run("keyless", false).await;
