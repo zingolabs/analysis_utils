@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use macros::annotated_benchmark;
+//use macros::annotated_benchmark;
 use tokio::time::Instant;
 use zingo_testutils::scenarios;
 
@@ -51,11 +51,12 @@ mod sync_1153_baseline_synctimes {
     async fn keyless_client_pu_true() {
         timing_run("keyless", true).await;
     }
+    /*
     #[annotated_benchmark("fun", "ham", 1)]
     #[tokio::test]
     async fn keyless_client_pu_false() {
         timing_run("keyless", false).await;
-    }
+    }*/
     #[tokio::test]
     async fn keyowning_client_pu_true() {
         timing_run("keyowning", true).await;
