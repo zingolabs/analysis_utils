@@ -2,7 +2,7 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use proc_macro2;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{parse_macro_input, Item};
 
 #[proc_macro_attribute]
@@ -20,11 +20,15 @@ pub fn annotated_benchmark(
 }
 
 fn annotate_function(fn_tokens: syn::ItemFn) -> proc_macro2::TokenStream {
-    let other_attributes = quote!(#fn_tokens.attrs);
     let ident = fn_tokens.sig.ident.to_string();
-    let start_statements_stop = sandwich_statements(fn_tokens.block.stmts);
-    let annotation = specify_annotations(ident);
-    quote!(#start_statements_stop #annotation)
+    let attrs = &fn_tokens
+        .attrs
+        .iter()
+        .map(|x| x.to_token_stream())
+        .collect::<proc_macro2::TokenStream>();
+    let signature = &fn_tokens.sig;
+    let start_statements_stop_annotate = sandwich_statements(ident, fn_tokens.block.stmts.clone());
+    quote!(#attrs #signature #start_statements_stop_annotate)
 }
 fn setup_and_start_timer() -> proc_macro2::TokenStream {
     quote!(
@@ -48,13 +52,18 @@ fn specify_annotations(nym: String) -> proc_macro2::TokenStream {
         zingo_testutils::record_time(&annotation);
     )
 }
-fn sandwich_statements(bench_statements: Vec<syn::Stmt>) -> proc_macro2::TokenStream {
+fn sandwich_statements(
+    test_name: String,
+    bench_statements: Vec<syn::Stmt>,
+) -> proc_macro2::TokenStream {
     let setup_start_time = setup_and_start_timer();
     let stop_rec_time = stop_and_record_time();
+    let annotate_statements = specify_annotations(test_name);
     quote!({
         #setup_start_time
         #(#bench_statements)*
         #stop_rec_time
+        #annotate_statements
     })
 }
 
@@ -66,7 +75,7 @@ fn show_macro_expansion() {
             syn::parse2(quote!(
                 #[tokio::test]
                 async fn keyless_client_pu_false() {
-                    timing_run("keyless", false).await;
+                    keyless.do_sync(true).await.unwrap();
                 }
             ))
             .expect("To succeed.")
