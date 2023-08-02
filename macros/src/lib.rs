@@ -20,13 +20,14 @@ pub fn annotated_benchmark(
 }
 fn annotate_function(fn_tokens: syn::ItemFn) -> proc_macro2::TokenStream {
     let ident = fn_tokens.sig.ident.to_string();
-    let attrs = &fn_tokens
+    let attrs = &mut fn_tokens
         .attrs
         .iter()
         .map(|x| x.to_token_stream())
         .collect::<proc_macro2::TokenStream>();
+
+    attrs.extend(quote!(#[tokio::test]));
     let signature = &fn_tokens.sig;
-    let _test = quote!(#[tokio::test]);
     let start_statements_stop_annotate = sandwich_statements(ident, fn_tokens.block.stmts.clone());
     quote!(#attrs #signature #start_statements_stop_annotate)
 }
@@ -72,7 +73,6 @@ fn show_annotate_function_expansion() {
         "{}",
         annotate_function(
             syn::parse2(quote!(
-                #[tokio::test]
                 async fn keyless_client_pu_false() {
                     keyless.do_sync(true).await.unwrap();
                 }

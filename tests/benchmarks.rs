@@ -49,7 +49,6 @@ mod sync_1153_baseline_synctimes {
 
     use super::*;
     #[annotated_benchmark]
-    #[tokio::test]
     async fn keyless_client_pu_false() {
         keyless.do_sync(true).await.unwrap();
     }
