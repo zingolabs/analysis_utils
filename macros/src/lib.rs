@@ -21,10 +21,9 @@ pub fn annotated_benchmark(
 
 fn annotate_function(fn_tokens: syn::ItemFn) -> proc_macro2::TokenStream {
     let other_attributes = quote!(#fn_tokens.attrs);
-    let ident = &fn_tokens.sig.ident;
-    let nym = quote!(#ident);
+    let ident = fn_tokens.sig.ident.to_string();
     let start_statements_stop = sandwich_statements(fn_tokens.block.stmts);
-    let annotation = specify_annotations(nym);
+    let annotation = specify_annotations(ident);
     quote!(#start_statements_stop #annotation)
 }
 fn setup_and_start_timer() -> proc_macro2::TokenStream {
@@ -40,10 +39,10 @@ fn stop_and_record_time() -> proc_macro2::TokenStream {
         sync_duration = timer_stop.duration_since(timer_start);
     )
 }
-fn specify_annotations(nym: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
+fn specify_annotations(nym: String) -> proc_macro2::TokenStream {
     quote!(
         let annotation = zingo_testutils::DurationAnnotation::new(
-            #nym.to_string(),
+            #nym,
             sync_duration,
         );
         zingo_testutils::record_time(&annotation);
