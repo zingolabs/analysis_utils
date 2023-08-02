@@ -18,7 +18,6 @@ pub fn annotated_benchmark(
     let function = annotate_function(function);
     TokenStream::from(quote! {#function})
 }
-
 fn annotate_function(fn_tokens: syn::ItemFn) -> proc_macro2::TokenStream {
     let ident = fn_tokens.sig.ident.to_string();
     let attrs = &fn_tokens
@@ -33,7 +32,7 @@ fn annotate_function(fn_tokens: syn::ItemFn) -> proc_macro2::TokenStream {
 }
 fn setup_and_start_timer() -> proc_macro2::TokenStream {
     quote!(
-        let (_, child_process_handler, keyowning, keyless) =
+        let (_, _child_process_handler, _keyowning, keyless) =
             scenarios::chainload::unsynced_faucet_recipient_1153().await;
         let timer_start = Instant::now();
     )
