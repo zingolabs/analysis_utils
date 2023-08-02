@@ -7,18 +7,19 @@ use syn::{parse_macro_input, Item};
 
 #[proc_macro_attribute]
 pub fn annotated_benchmark(
-    _attrib_args: TokenStream,
+    attrib_args: TokenStream,
     bench_template_args: TokenStream,
 ) -> TokenStream {
+    dbg!(&attrib_args);
     let function = if let Item::Fn(funct) = parse_macro_input!(bench_template_args as Item) {
         funct
     } else {
         panic!("Expected to be applied to a function!")
     };
-    let function = annotate_function(function);
-    TokenStream::from(quote! {#function})
+    let processed_benchmark = generate_benchmark(function);
+    TokenStream::from(quote! {#processed_benchmark})
 }
-fn annotate_function(fn_tokens: syn::ItemFn) -> proc_macro2::TokenStream {
+fn generate_benchmark(fn_tokens: syn::ItemFn) -> proc_macro2::TokenStream {
     let ident = fn_tokens.sig.ident.to_string();
     let attrs = &mut fn_tokens
         .attrs
@@ -71,7 +72,7 @@ fn sandwich_statements(
 fn show_annotate_function_expansion() {
     println!(
         "{}",
-        annotate_function(
+        generate_benchmark(
             syn::parse2(quote!(
                 async fn keyless_client_pu_false() {
                     keyless.do_sync(true).await.unwrap();
