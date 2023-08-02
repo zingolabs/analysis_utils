@@ -7,7 +7,7 @@ use syn::{parse_macro_input, Item};
 
 #[proc_macro_attribute]
 pub fn annotated_benchmark(
-    attrib_args: TokenStream,
+    _attrib_args: TokenStream,
     bench_template_args: TokenStream,
 ) -> TokenStream {
     let function = if let Item::Fn(funct) = parse_macro_input!(bench_template_args as Item) {
@@ -27,12 +27,13 @@ fn annotate_function(fn_tokens: syn::ItemFn) -> proc_macro2::TokenStream {
         .map(|x| x.to_token_stream())
         .collect::<proc_macro2::TokenStream>();
     let signature = &fn_tokens.sig;
+    let _test = quote!(#[tokio::test]);
     let start_statements_stop_annotate = sandwich_statements(ident, fn_tokens.block.stmts.clone());
     quote!(#attrs #signature #start_statements_stop_annotate)
 }
 fn setup_and_start_timer() -> proc_macro2::TokenStream {
     quote!(
-        let (_, child_process_handler, keyowning, _keyless) =
+        let (_, child_process_handler, keyowning, keyless) =
             scenarios::chainload::unsynced_faucet_recipient_1153().await;
         let timer_start = Instant::now();
     )
@@ -40,15 +41,12 @@ fn setup_and_start_timer() -> proc_macro2::TokenStream {
 fn stop_and_record_time() -> proc_macro2::TokenStream {
     quote!(
         let timer_stop = Instant::now();
-        sync_duration = timer_stop.duration_since(timer_start);
+        let sync_duration = timer_stop.duration_since(timer_start);
     )
 }
 fn specify_annotations(nym: String) -> proc_macro2::TokenStream {
     quote!(
-        let annotation = zingo_testutils::DurationAnnotation::new(
-            #nym,
-            sync_duration,
-        );
+        let annotation = zingo_testutils::DurationAnnotation::new(#nym.to_string(), sync_duration);
         zingo_testutils::record_time(&annotation);
     )
 }
@@ -59,16 +57,18 @@ fn sandwich_statements(
     let setup_start_time = setup_and_start_timer();
     let stop_rec_time = stop_and_record_time();
     let annotate_statements = specify_annotations(test_name);
-    quote!({
+    quote!(
+        {
         #setup_start_time
         #(#bench_statements)*
         #stop_rec_time
         #annotate_statements
-    })
+        }
+    )
 }
 
 #[test]
-fn show_macro_expansion() {
+fn show_annotate_function_expansion() {
     println!(
         "{}",
         annotate_function(
