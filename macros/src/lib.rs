@@ -16,10 +16,14 @@ pub fn annotated_benchmark(
     } else {
         panic!("Expected to be applied to a function!")
     };
-    let processed_benchmark = generate_benchmark(function);
+    let processed_benchmark = generate_benchmark(function, attrib_args);
     TokenStream::from(quote! {#processed_benchmark})
 }
-fn generate_benchmark(fn_tokens: syn::ItemFn) -> proc_macro2::TokenStream {
+fn generate_benchmark(
+    fn_tokens: syn::ItemFn,
+    attrib_args: TokenStream,
+) -> proc_macro2::TokenStream {
+    // Process input tokens after handling attribute_args
     let ident = fn_tokens.sig.ident.to_string();
     let attrs = &mut fn_tokens
         .attrs
@@ -78,7 +82,8 @@ fn show_annotate_function_expansion() {
                     keyless.do_sync(true).await.unwrap();
                 }
             ))
-            .expect("To succeed.")
+            .expect("To succeed."),
+            quote!(),
         )
         .to_string()
     );
