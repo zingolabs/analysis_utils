@@ -7,7 +7,6 @@ use syn::{parse_macro_input, Item};
 
 #[proc_macro_attribute]
 pub fn annotated_benchmark(attrib_args: TokenStream, bench_template: TokenStream) -> TokenStream {
-    dbg!(&attrib_args);
     let function = if let Item::Fn(funct) = parse_macro_input!(bench_template as Item) {
         funct
     } else {
@@ -26,6 +25,7 @@ fn generate_benchmark(fn_tokens: syn::ItemFn, scenario: syn::Ident) -> proc_macr
         .map(|x| x.to_token_stream())
         .collect::<proc_macro2::TokenStream>();
 
+    attrs.extend(quote!(#[allow(unused_variables)]));
     attrs.extend(quote!(#[tokio::test]));
     let signature = &fn_tokens.sig;
     let start_statements_stop_annotate =
@@ -34,7 +34,7 @@ fn generate_benchmark(fn_tokens: syn::ItemFn, scenario: syn::Ident) -> proc_macr
 }
 fn setup_and_start_timer(scenario: syn::Ident) -> proc_macro2::TokenStream {
     quote!(
-        let (_, _child_process_handler, _keyowning, keyless) =
+        let (regtest_manager, child_process_handler, keyowning, keyless) =
             scenarios::chainload::#scenario().await;
         let timer_start = Instant::now();
     )

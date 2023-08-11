@@ -17,7 +17,7 @@ async fn keyless_client_pu_true() {
 #[tokio::test]
 async fn keyless_client_pu_false() {
     timing_run("keyless", false).await;
-}*/
+}
 #[tokio::test]
 async fn keyowning_client_pu_true() {
     timing_run("keyowning", true).await;
@@ -34,3 +34,4 @@ async fn fullviewonly_client_pu_true() {
 async fn fullviewonly_client_pu_false() {
     timing_run("fullviewonly", false).await;
 }
+*/
