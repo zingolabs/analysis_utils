@@ -48,7 +48,7 @@ async fn timing_run(keyownership: &str, print_updates: bool) {
 mod sync_1153_baseline_synctimes {
 
     use super::*;
-    #[annotated_benchmark]
+    #[annotated_benchmark(unsynced_faucet_recipient_1153)]
     async fn keyless_client_pu_false() {
         keyless.do_sync(true).await.unwrap();
     }
