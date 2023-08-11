@@ -12,26 +12,19 @@ async fn keyless_client_pu_false() {
 async fn keyless_client_pu_true() {
     keyless.do_sync(true).await.unwrap();
 }
-/*
-#[annotated_benchmark("fun", "ham", 1)]
-#[tokio::test]
-async fn keyless_client_pu_false() {
-    timing_run("keyless", false).await;
-}
-#[tokio::test]
+#[annotated_benchmark(unsynced_faucet_recipient_1153)]
 async fn keyowning_client_pu_true() {
-    timing_run("keyowning", true).await;
+    keyowning.do_sync(true).await.unwrap();
 }
-#[tokio::test]
+#[annotated_benchmark(unsynced_faucet_recipient_1153)]
 async fn keyowning_client_pu_false() {
-    timing_run("keyowning", false).await;
+    keyowning.do_sync(false).await.unwrap();
 }
-#[tokio::test]
+#[annotated_benchmark(unsynced_viewonlyclient_1153)]
 async fn fullviewonly_client_pu_true() {
-    timing_run("fullviewonly", true).await;
+    keyowning.do_sync(true).await.unwrap();
 }
-#[tokio::test]
+#[annotated_benchmark(unsynced_viewonlyclient_1153)]
 async fn fullviewonly_client_pu_false() {
-    timing_run("fullviewonly", false).await;
+    keyowning.do_sync(false).await.unwrap();
 }
-*/
