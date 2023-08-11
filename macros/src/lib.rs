@@ -21,7 +21,7 @@ pub fn annotated_benchmark(
 }
 fn generate_benchmark(
     fn_tokens: syn::ItemFn,
-    attrib_args: TokenStream,
+    _attrib_args: TokenStream,
 ) -> proc_macro2::TokenStream {
     // Process input tokens after handling attribute_args
     let ident = fn_tokens.sig.ident.to_string();
