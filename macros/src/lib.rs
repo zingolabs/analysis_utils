@@ -6,23 +6,18 @@ use quote::{quote, ToTokens};
 use syn::{parse_macro_input, Item};
 
 #[proc_macro_attribute]
-pub fn annotated_benchmark(
-    attrib_args: TokenStream,
-    bench_template_args: TokenStream,
-) -> TokenStream {
+pub fn annotated_benchmark(attrib_args: TokenStream, bench_template: TokenStream) -> TokenStream {
     dbg!(&attrib_args);
-    let function = if let Item::Fn(funct) = parse_macro_input!(bench_template_args as Item) {
+    let function = if let Item::Fn(funct) = parse_macro_input!(bench_template as Item) {
         funct
     } else {
         panic!("Expected to be applied to a function!")
     };
-    let processed_benchmark = generate_benchmark(function, attrib_args);
+    let scenario = parse_macro_input!(attrib_args as syn::Ident);
+    let processed_benchmark = generate_benchmark(function, scenario);
     TokenStream::from(quote! {#processed_benchmark})
 }
-fn generate_benchmark(
-    fn_tokens: syn::ItemFn,
-    _attrib_args: TokenStream,
-) -> proc_macro2::TokenStream {
+fn generate_benchmark(fn_tokens: syn::ItemFn, scenario: syn::Ident) -> proc_macro2::TokenStream {
     // Process input tokens after handling attribute_args
     let ident = fn_tokens.sig.ident.to_string();
     let attrs = &mut fn_tokens
@@ -33,13 +28,14 @@ fn generate_benchmark(
 
     attrs.extend(quote!(#[tokio::test]));
     let signature = &fn_tokens.sig;
-    let start_statements_stop_annotate = sandwich_statements(ident, fn_tokens.block.stmts.clone());
+    let start_statements_stop_annotate =
+        sandwich_statements(scenario, ident, fn_tokens.block.stmts.clone());
     quote!(#attrs #signature #start_statements_stop_annotate)
 }
-fn setup_and_start_timer() -> proc_macro2::TokenStream {
+fn setup_and_start_timer(scenario: syn::Ident) -> proc_macro2::TokenStream {
     quote!(
         let (_, _child_process_handler, _keyowning, keyless) =
-            scenarios::chainload::unsynced_faucet_recipient_1153().await;
+            scenarios::chainload::#scenario().await;
         let timer_start = Instant::now();
     )
 }
@@ -56,10 +52,11 @@ fn specify_annotations(nym: String) -> proc_macro2::TokenStream {
     )
 }
 fn sandwich_statements(
+    scenario: syn::Ident,
     test_name: String,
     bench_statements: Vec<syn::Stmt>,
 ) -> proc_macro2::TokenStream {
-    let setup_start_time = setup_and_start_timer();
+    let setup_start_time = setup_and_start_timer(scenario);
     let stop_rec_time = stop_and_record_time();
     let annotate_statements = specify_annotations(test_name);
     quote!(
@@ -83,7 +80,7 @@ fn show_annotate_function_expansion() {
                 }
             ))
             .expect("To succeed."),
-            quote!(),
+            syn::parse2(quote!(unsynced_faucet_recipient_1153)).expect("to parse to Ident")
         )
         .to_string()
     );
