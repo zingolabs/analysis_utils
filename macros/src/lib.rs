@@ -61,10 +61,15 @@ fn sandwich_statements(
     let annotate_statements = specify_annotations(test_name);
     quote!(
         {
-        #setup_start_time
-        #(#bench_statements)*
-        #stop_rec_time
-        #annotate_statements
+            let mut counter = 0;
+            loop {
+                #setup_start_time
+                #(#bench_statements)*
+                #stop_rec_time
+                #annotate_statements
+                count+=1;
+                if count == 10 {break;}
+            }
         }
     )
 }
