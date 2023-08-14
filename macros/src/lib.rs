@@ -46,8 +46,9 @@ fn stop_and_record_time() -> proc_macro2::TokenStream {
     )
 }
 fn specify_annotations(scenario: syn::Ident, nym: String) -> proc_macro2::TokenStream {
+    let scenario_name = scenario.to_string();
     quote!(
-        let annotation = zingo_testutils::DurationAnnotation::new(#scenario.to_string(), #nym.to_string(), sync_duration);
+        let annotation = zingo_testutils::DurationAnnotation::new(#scenario_name.to_string(), #nym.to_string(), sync_duration);
         zingo_testutils::record_time(&annotation);
     )
 }
@@ -68,7 +69,7 @@ fn sandwich_statements(
                 #stop_rec_time
                 #annotate_statements
                 count+=1;
-                if count == 2 {break;}
+                if count == 10 {break;}
             }
         }
     )

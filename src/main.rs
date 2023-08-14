@@ -27,6 +27,16 @@ impl Annotations {
             .collect();
         Annotations(matches)
     }
+    #[allow(dead_code)]
+    fn filter_on_scenario(&self, name: &str) -> Annotations {
+        let matches = self
+            .0
+            .clone()
+            .into_iter()
+            .filter(|da| da.scenario.contains(name))
+            .collect();
+        Annotations(matches)
+    }
     #[allow(unused)]
     fn filter_on_git_description(&self, git_description: &str) -> Annotations {
         let matches = self
@@ -47,7 +57,6 @@ impl Annotations {
         (duration_max >> 3) + duration_max
     }
     fn get_testname(&self) -> String {
-        dbg!(&self.0);
         self.0[0]
             .test_name
             .clone()
@@ -116,12 +125,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     root.fill(&style::colors::WHITE)?;
 
-    //let git_description = dbg!(&keyowning_client_pu_false.0[0].git_description);
-    //let caption = format!("1153 block sync times, version: {}", &git_description);
+    let git_description = &keyowning_client_pu_false.0[0].git_description;
+    let caption = format!("1153 block sync times, version: {}", &git_description);
     let mut chart = plotters::chart::ChartBuilder::on(&root)
         .x_label_area_size(30)
         .y_label_area_size(60)
-        .caption("caption".to_string(), ("Calibri", 30.0))
+        .caption(caption.to_string(), ("Calibri", 30.0))
         .build_cartesian_2d(0u64..4, 0u64..duration_roof)?;
 
     chart
@@ -133,7 +142,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .draw()?;
     let mut position = 0;
     graph_durations!(chart, keyless_client_pu_false, BLUE, position);
-    //graph_durations!(chart, fullviewonly_client_pu_false, RED, position);
+    graph_durations!(chart, fullviewonly_client_pu_false, RED, position);
     graph_durations!(chart, keyowning_client_pu_false, GREEN, position);
     chart
         .configure_series_labels()
