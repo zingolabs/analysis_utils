@@ -37,16 +37,17 @@ impl Annotations {
             .collect();
         Annotations(matches)
     }
-    fn get_da_roof(&self) -> u128 {
+    fn get_da_roof(&self) -> u64 {
         let durations = self
             .0
             .iter()
-            .map(|da| da.duration.as_millis())
-            .collect::<Vec<u128>>();
+            .map(|da| da.duration.as_secs())
+            .collect::<Vec<u64>>();
         let duration_max = durations.iter().fold(0, |acc, d| acc.max(*d));
         (duration_max >> 3) + duration_max
     }
     fn get_testname(&self) -> String {
+        dbg!(&self.0);
         self.0[0]
             .test_name
             .clone()
@@ -68,13 +69,13 @@ macro_rules! graph_durations {
             .draw_series($annotations.0.iter().enumerate().map(
                 |(_, DurationAnnotation { duration, .. })| {
                     plotters::prelude::Circle::new(
-                        ($position, duration.as_millis()),
+                        ($position, duration.as_secs()),
                         2,
                         plotters::style::$color.filled(),
                     )
                 },
             ))?
-            .label($annotations.get_testname())
+            .label(&$annotations.get_testname())
             .legend(|(x, y)| Circle::new((x + 15, y), 2, plotters::style::$color.filled()));
         //let mean = $annotations.get_da_mean();
     };
@@ -101,19 +102,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         duration_annotations.filter_on_testname("keyowning_client_pu_false");
     let fullviewonly_client_pu_false =
         duration_annotations.filter_on_testname("fullviewonly_client_pu_false");
-    if dbg!(fullviewonly_client_pu_false.0.len()) == 0
-        || dbg!(keyless_client_pu_false.0.len()) == 0
-        || dbg!(keyowning_client_pu_false.0.len()) == 0
-    {
-        panic!("Empty list!")
-    }
-    dbg!(&fullviewonly_client_pu_false);
     let keyless_duration_roof = keyless_client_pu_false.get_da_roof();
-    //let keyowning_duration_roof = keyowning_client_pu_false.get_da_roof();
+    let keyowning_duration_roof = keyowning_client_pu_false.get_da_roof();
     let full_duration_roof = fullviewonly_client_pu_false.get_da_roof();
-    //let first_duration_roof = keyless_duration_roof.max(full_duration_roof);
-    let duration_roof = keyless_duration_roof.max(full_duration_roof);
-    //let das = viewonly_client_pu_false_das.0.len() as u128;
+    let first_duration_roof = keyless_duration_roof.max(full_duration_roof);
+    let duration_roof = keyowning_duration_roof.max(first_duration_roof);
     // Begin plotting expressions
     use plotters::{backend, drawing};
     let root = drawing::IntoDrawingArea::into_drawing_area(backend::BitMapBackend::new(
@@ -123,41 +116,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     root.fill(&style::colors::WHITE)?;
 
+    //let git_description = dbg!(&keyowning_client_pu_false.0[0].git_description);
+    //let caption = format!("1153 block sync times, version: {}", &git_description);
     let mut chart = plotters::chart::ChartBuilder::on(&root)
         .x_label_area_size(30)
         .y_label_area_size(60)
-        .caption("1153 Block Chain, Sync Times", ("Calibri", 30.0))
-        .build_cartesian_2d(0u128..3, 0u128..duration_roof)?;
+        .caption("caption".to_string(), ("Calibri", 30.0))
+        .build_cartesian_2d(0u64..4, 0u64..duration_roof)?;
 
     chart
         .configure_mesh()
         .bold_line_style(WHITE.mix(0.3))
-        .y_desc("MilliSeconds To Sync")
+        .y_desc("Seconds To Sync")
         .x_desc("Benchmark Scenarios")
         .axis_desc_style(("sans-serif", 15))
         .draw()?;
     let mut position = 0;
     graph_durations!(chart, keyless_client_pu_false, BLUE, position);
-    graph_durations!(chart, fullviewonly_client_pu_false, RED, position);
-    //graph_durations!(chart, keyowning_client_pu_false, GREEN, position);
+    //graph_durations!(chart, fullviewonly_client_pu_false, RED, position);
+    graph_durations!(chart, keyowning_client_pu_false, GREEN, position);
     chart
         .configure_series_labels()
         .label_font(("Calibri", 20))
         .background_style(plotters::style::WHITE.mix(0.8))
         .border_style(plotters::style::BLACK)
         .draw()?;
-    /*
-        ChartBuilder::on(&root)
-            .caption(
-                "keyless_client, fvk_only_client, keyowning_client",
-                ("sans-serif", 30),
-            )
-            .x_label_area_size(40)
-            .y_label_area_size(50)
-            .build_cartesian_2d(0..duration_roof as u32, 0f32..1f32)?;
-    */
-    //let run_by_duration: Vec<usize, Duration> = duration_annotations.iter().menumerate().collect();
-    //let areas = root.split_by_breakpoints([944], [80]);
 
     root.present().expect("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir");
     Ok(())

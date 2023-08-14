@@ -32,7 +32,7 @@ fn generate_benchmark(fn_tokens: syn::ItemFn, scenario: syn::Ident) -> proc_macr
         sandwich_statements(scenario, ident, fn_tokens.block.stmts.clone());
     quote!(#attrs #signature #start_statements_stop_annotate)
 }
-fn setup_and_start_timer(scenario: syn::Ident) -> proc_macro2::TokenStream {
+fn setup_and_start_timer(scenario: &syn::Ident) -> proc_macro2::TokenStream {
     quote!(
         let (regtest_manager, child_process_handler, keyowning, keyless) =
             scenarios::chainload::#scenario().await;
@@ -45,9 +45,9 @@ fn stop_and_record_time() -> proc_macro2::TokenStream {
         let sync_duration = timer_stop.duration_since(timer_start);
     )
 }
-fn specify_annotations(nym: String) -> proc_macro2::TokenStream {
+fn specify_annotations(scenario: syn::Ident, nym: String) -> proc_macro2::TokenStream {
     quote!(
-        let annotation = zingo_testutils::DurationAnnotation::new(#nym.to_string(), sync_duration);
+        let annotation = zingo_testutils::DurationAnnotation::new(#scenario.to_string(), #nym.to_string(), sync_duration);
         zingo_testutils::record_time(&annotation);
     )
 }
@@ -56,19 +56,19 @@ fn sandwich_statements(
     test_name: String,
     bench_statements: Vec<syn::Stmt>,
 ) -> proc_macro2::TokenStream {
-    let setup_start_time = setup_and_start_timer(scenario);
+    let setup_start_time = setup_and_start_timer(&scenario);
     let stop_rec_time = stop_and_record_time();
-    let annotate_statements = specify_annotations(test_name);
+    let annotate_statements = specify_annotations(scenario, test_name);
     quote!(
         {
-            let mut counter = 0;
+            let mut count = 0;
             loop {
                 #setup_start_time
                 #(#bench_statements)*
                 #stop_rec_time
                 #annotate_statements
                 count+=1;
-                if count == 10 {break;}
+                if count == 2 {break;}
             }
         }
     )
