@@ -1,72 +1,11 @@
+use analysis_utils::duration_annotation::get_duration_annotations;
+use analysis_utils::duration_annotation::Annotations;
+use analysis_utils::duration_annotation::DurationAnnotation;
 use clap::Parser;
 use plotters::{
     prelude::Circle,
     style::{self, full_palette::WHITE, Color},
 };
-use zingo_testutils::DurationAnnotation;
-
-#[derive(Debug)]
-struct Annotations(Vec<DurationAnnotation>);
-struct ToDisplay(String);
-impl std::fmt::Display for ToDisplay {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::write!(f, "{}", self.0)
-    }
-}
-impl Annotations {
-    #[allow(unused)]
-    fn truncate(&self) -> Annotations {
-        let trunced = self.0[..self.0.len() - 1].to_vec();
-        Annotations(trunced)
-    }
-    fn filter_on_testname(&self, name: &str) -> Annotations {
-        let matches = self
-            .0
-            .clone()
-            .into_iter()
-            .filter(|da| da.test_name == name)
-            .collect();
-        Annotations(matches)
-    }
-    #[allow(dead_code)]
-    fn filter_on_scenario(&self, name: &str) -> Annotations {
-        let matches = self
-            .0
-            .clone()
-            .into_iter()
-            .filter(|da| da.scenario.contains(name))
-            .collect();
-        Annotations(matches)
-    }
-    #[allow(unused)]
-    fn filter_on_git_description(&self, git_description: &str) -> Annotations {
-        let matches = self
-            .0
-            .clone()
-            .into_iter()
-            .filter(|da| da.git_description == git_description)
-            .collect();
-        Annotations(matches)
-    }
-    fn get_da_roof(&self) -> u64 {
-        let durations = self
-            .0
-            .iter()
-            .map(|da| da.duration.as_secs())
-            .collect::<Vec<u64>>();
-        let duration_max = durations.iter().fold(0, |acc, d| acc.max(*d));
-        (duration_max >> 3) + duration_max
-    }
-    fn get_testname(&self) -> String {
-        self.0[0]
-            .test_name
-            .clone()
-            .trim_start_matches("sync_1153_baseline_synctimes_")
-            .trim_end_matches("_client_pu_false")
-            .to_string()
-    }
-}
-
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -103,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //let image_location = std::path::PathBuf::from(image_str);
     println!("Annotation Source File: {}", cli.file.to_str().unwrap());
     // load annotations
-    let duration_annotations = Annotations(zingo_testutils::get_duration_annotations(cli.file));
+    let duration_annotations = Annotations(get_duration_annotations(cli.file));
 
     // viewonly_client_pu_false section:
     let keyless_client_pu_false =
