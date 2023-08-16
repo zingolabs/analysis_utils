@@ -3,7 +3,7 @@
 use macros::annotated_benchmark;
 
 use tokio::time::Instant;
-use zingo_testutils::scenarios;
+use crate::scenarios;
 
 #[annotated_benchmark(unsynced_faucet_recipient_1153)]
 async fn keyless_client_pu_false() {
