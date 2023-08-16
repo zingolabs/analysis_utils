@@ -4,6 +4,7 @@ use plotters::{
     style::{self, full_palette::WHITE, Color},
 };
 use zingo_testutils::DurationAnnotation;
+
 #[derive(Debug)]
 struct Annotations(Vec<DurationAnnotation>);
 struct ToDisplay(String);

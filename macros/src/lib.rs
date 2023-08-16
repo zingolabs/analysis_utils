@@ -34,8 +34,7 @@ fn generate_benchmark(fn_tokens: syn::ItemFn, scenario: syn::Ident) -> proc_macr
 }
 fn setup_and_start_timer(scenario: &syn::Ident) -> proc_macro2::TokenStream {
     quote!(
-        let (regtest_manager, child_process_handler, keyowning, keyless) =
-            scenarios::chainload::#scenario().await;
+        let (regtest_manager, child_process_handler, keyowning, keyless) = analysis_utils::scenarios::#scenario().await;
         let timer_start = Instant::now();
     )
 }
