@@ -34,8 +34,7 @@ fn generate_benchmark(fn_tokens: syn::ItemFn, scenario: syn::Ident) -> proc_macr
 }
 fn setup_and_start_timer(scenario: &syn::Ident) -> proc_macro2::TokenStream {
     quote!(
-        let (regtest_manager, child_process_handler, keyowning, keyless) =
-            scenarios::chainload::#scenario().await;
+        let (regtest_manager, child_process_handler, keyowning, keyless) = analysis_utils::scenarios::#scenario().await;
         let timer_start = Instant::now();
     )
 }
@@ -48,8 +47,8 @@ fn stop_and_record_time() -> proc_macro2::TokenStream {
 fn specify_annotations(scenario: syn::Ident, nym: String) -> proc_macro2::TokenStream {
     let scenario_name = scenario.to_string();
     quote!(
-        let annotation = zingo_testutils::DurationAnnotation::new(#scenario_name.to_string(), #nym.to_string(), sync_duration);
-        zingo_testutils::record_time(&annotation);
+        let annotation = analysis_utils::duration_annotation::DurationAnnotation::new(#scenario_name.to_string(), #nym.to_string(), sync_duration);
+        analysis_utils::duration_annotation::record_time(&annotation);
     )
 }
 fn sandwich_statements(
