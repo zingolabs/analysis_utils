@@ -18,7 +18,7 @@ macro_rules! graph_durations {
             .draw_series($annotations.0.iter().enumerate().map(
                 |(_, DurationAnnotation { duration, .. })| {
                     plotters::prelude::Circle::new(
-                        ($position, duration.as_secs()),
+                        ($position, duration.as_millis() as u64),
                         2,
                         plotters::style::$color.filled(),
                     )
@@ -76,7 +76,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     chart
         .configure_mesh()
         .bold_line_style(WHITE.mix(0.3))
-        .y_desc("Seconds To Sync")
+        .y_desc("Milliseconds To Sync")
         .x_desc("Benchmark Scenarios")
         .axis_desc_style(("sans-serif", 15))
         .draw()?;

@@ -29,8 +29,8 @@ pub async fn unsynced_viewonlyclient_1153() -> (
     (
         sb.regtest_manager,
         sb.child_process_handler.unwrap(),
-        original_recipient,
         viewing_client,
+        original_recipient,
     )
 }
 pub async fn unsynced_faucet_recipient_1153() -> (
