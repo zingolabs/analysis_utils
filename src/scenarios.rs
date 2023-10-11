@@ -4,13 +4,14 @@ use zingo_testutils::regtest::RegtestManager;
 use zingo_testutils::scenarios::setup::ScenarioBuilder;
 use zingo_testutils::{build_fvk_client, build_fvks_from_wallet_capability};
 use zingolib::lightclient::LightClient;
+
 pub async fn unsynced_viewonlyclient_1153() -> (
     RegtestManager,
     ChildProcessHandler,
     LightClient,
     LightClient,
 ) {
-    let mut sb = ScenarioBuilder::new_load_1153_saplingcb_regtest_chain();
+    let mut sb = ScenarioBuilder::new_load_1153_saplingcb_regtest_chain().await;
     let zingo_config = zingolib::load_clientconfig(
         sb.client_builder.server_id.clone(),
         Some(sb.client_builder.zingo_datadir.clone()),
@@ -39,7 +40,7 @@ pub async fn unsynced_faucet_recipient_1153() -> (
     LightClient,
     LightClient,
 ) {
-    let mut sb = ScenarioBuilder::new_load_1153_saplingcb_regtest_chain();
+    let mut sb = ScenarioBuilder::new_load_1153_saplingcb_regtest_chain().await;
     //(Some(REGSAP_ADDR_FROM_ABANDONART.to_string()), None);
     let faucet = sb.client_builder.build_new_faucet(0, false).await;
     let recipient = sb
