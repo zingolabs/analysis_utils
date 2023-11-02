@@ -3,6 +3,7 @@ use zingo_testutils::regtest::ChildProcessHandler;
 use zingo_testutils::regtest::RegtestManager;
 use zingo_testutils::scenarios::setup::ScenarioBuilder;
 use zingo_testutils::{build_fvk_client, build_fvks_from_wallet_capability};
+use zingoconfig::RegtestNetwork;
 use zingolib::lightclient::LightClient;
 
 pub async fn unsynced_viewonlyclient_1153() -> (
@@ -11,16 +12,17 @@ pub async fn unsynced_viewonlyclient_1153() -> (
     LightClient,
     LightClient,
 ) {
-    let mut sb = ScenarioBuilder::new_load_1153_saplingcb_regtest_chain().await;
+    let regtest_network = RegtestNetwork::all_upgrades_active();
+    let mut sb = ScenarioBuilder::new_load_1153_saplingcb_regtest_chain(&regtest_network).await;
     let zingo_config = zingolib::load_clientconfig(
         sb.client_builder.server_id.clone(),
         Some(sb.client_builder.zingo_datadir.clone()),
-        zingoconfig::ChainType::Regtest,
+        zingoconfig::ChainType::Regtest(regtest_network),
         true,
     )
     .unwrap();
     // Create a lightclient to extract a capability from.
-    let original_recipient = sb.client_builder.build_new_faucet(0, false).await;
+    let original_recipient = sb.client_builder.build_faucet(false, regtest_network).await;
     // Extract viewing keys
     let wallet_capability = original_recipient.wallet.wallet_capability().clone();
     // Delete the client after getting the capability.
@@ -40,12 +42,13 @@ pub async fn unsynced_faucet_recipient_1153() -> (
     LightClient,
     LightClient,
 ) {
-    let mut sb = ScenarioBuilder::new_load_1153_saplingcb_regtest_chain().await;
+    let regtest_network = RegtestNetwork::all_upgrades_active();
+    let mut sb = ScenarioBuilder::new_load_1153_saplingcb_regtest_chain(&regtest_network).await;
     //(Some(REGSAP_ADDR_FROM_ABANDONART.to_string()), None);
-    let faucet = sb.client_builder.build_new_faucet(0, false).await;
+    let faucet = sb.client_builder.build_faucet(false, regtest_network).await;
     let recipient = sb
         .client_builder
-        .build_newseed_client(HOSPITAL_MUSEUM_SEED.to_string(), 0, false)
+        .build_client(HOSPITAL_MUSEUM_SEED.to_string(), 0, false, regtest_network)
         .await;
     (
         sb.regtest_manager,
