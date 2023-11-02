@@ -8,9 +8,9 @@ edition = "2021"
 macros = { package = "macros", path = "macros" }
 clap = { version = "4.3.11", features = ["derive"] }
 plotters = "0.3.5"
-zingo-testutils = { git = "https://github.com/zingolabs/zingolib", branch = "dev" }
-zingolib = { git = "https://github.com/zingolabs/zingolib", branch = "dev" }
-zingoconfig = { git = "https://github.com/zingolabs/zingolib", branch = "dev" }
+zingo-testutils = { path = "../zingolibs/for_analysis_utils/zingo-testutils" }
+zingolib = { path = "../zingolibs/for_analysis_utils/zingolib" }
+zingoconfig = { path = "../zingolibs/for_analysis_utils/zingoconfig" }
 tokio =  { version = "1.24.2", features = ["full"] }
 json = "0.12.4"
 serde = "1.0.190"

@@ -68,7 +68,7 @@ fn sandwich_statements(
                 #stop_rec_time
                 #annotate_statements
                 count+=1;
-                if count == 10 {break;}
+                if count == 1 {break;}
             }
         }
     )
