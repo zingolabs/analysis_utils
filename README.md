@@ -18,8 +18,18 @@
 
   `cargo nextest run keyowning_client_pu_false`
 
-3.  Step 2\. produces (or appends to a file in tests/times) named *_sync_duration_annotation.json
+  IMPORTANT NOTE: Benchmarks must be run individually. If they are run in parallel, they will compete for system resources
 
-4. THIS ONLY KINDA WORKS FOR SPECIFIC CASES You can pass a duration_annotation file to `cargo run` to produce a plot of different kinds of annotations.
+3.  Step 2\. produces (or appends to a file in tests/times) named {ZINGOLIB_VERSION}_sync_duration_annotation.json
+
+    The current set of supported tests are 
+
+      `keyless_client_pu_false`
+      
+      `fullviewonly_client_pu_false`
+      
+      `keyowning_client_pu_false`
+      
+    After running all three of the above tests, you can pass the output duration_annotation file to `cargo run` to produce a plot of different kinds of annotations.
 
 
