@@ -1,6 +1,8 @@
 # TL;DR Follow these steps to run a benchmark
 
 0. git clone zingolib and checkout the version you want to benchmark
+01. point ./Cargo.toml at it.
+02. symlink zcashd, zcash-cli, and lightwalletd to analysis_utils/regtest/bin/
 
 1. Follow the zingo-testutils README at `docs/TEST-REGTEST.md` to set up regtest mode in the version of the code that you want to benchmark.
 2. run: cargo nextest run $BENCHMARK
